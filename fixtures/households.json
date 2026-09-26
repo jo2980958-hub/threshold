@@ -1,0 +1,145 @@
+{
+  "_comment": "SYNTHETIC. Three households under one care agency, their doors, their silence thresholds and their recurring care packages. Loaded by threshold/replay.py into SQLite; in a real deployment these are configured per household through POST /api/settings and POST /api/schedule-rules, not from a file. Every rule carries an active_from, and Oakfield's evening visit carries an active_until with a replacement rule after it: that is the schedule-versioning case. A rule with no active range would apply backwards through every day the household has ever recorded, manufacturing a 'no arrival was recorded' row against past days for a visit that was never booked on any of them. Every household is in Europe/London so the demo exercises the real case: booked visit times are local wall-clock times, and a clock change moves them.",
+  "agency": {
+    "id": "northgate-care",
+    "name": "Northgate Care"
+  },
+  "households": [
+    {
+      "id": "oakfield",
+      "name": "Oakfield Road",
+      "agency_id": "northgate-care",
+      "quiet_threshold_hours": 14,
+      "usual_activity_by_hour": 10,
+      "doors": [
+        {
+          "device_id": "front_door_1",
+          "label": "Front door",
+          "is_primary": true
+        },
+        {
+          "device_id": "back_door_1",
+          "label": "Back door",
+          "is_primary": false
+        }
+      ],
+      "schedule_rules": [
+        {
+          "label": "Morning visit",
+          "days_of_week": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start_time": "08:00",
+          "end_time": "08:45",
+          "active_from": "2026-09-01"
+        },
+        {
+          "label": "Midday check-in",
+          "days_of_week": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start_time": "12:00",
+          "end_time": "12:30",
+          "active_from": "2026-09-01"
+        },
+        {
+          "label": "Evening visit",
+          "days_of_week": [
+            0,
+            2,
+            4
+          ],
+          "start_time": "17:00",
+          "end_time": "17:45",
+          "active_from": "2026-09-01",
+          "active_until": "2026-09-16"
+        },
+        {
+          "label": "Evening visit",
+          "days_of_week": [
+            0,
+            2,
+            4
+          ],
+          "start_time": "17:00",
+          "end_time": "18:00",
+          "active_from": "2026-09-17",
+          "_comment": "The package was amended on 17 September: the evening call went from 45 minutes to an hour. The rule above is closed on the 16th rather than edited, so days before the change still compare against what was actually booked then."
+        }
+      ],
+      "timezone": "Europe/London",
+      "notes": [
+        {
+          "occurred_on": "2026-09-18",
+          "at_time": "12:10",
+          "visit_label": "Midday check-in",
+          "author": "Anna",
+          "text": "She came at about ten past, I let her in through the back because the front door sticks.",
+          "_comment": "The whole point of this feature. The doorbell recorded nothing in the Friday midday window and the app says so, correctly and neutrally. This note is the household writing in what the door could not see. It sits beside the machine record, never over it, and the visit's status does not change."
+        }
+      ],
+      "away": [
+        {
+          "start_date": "2026-09-19",
+          "end_date": "2026-09-19",
+          "label": "Away for the day",
+          "_comment": "Saturday 19 September has no events at all. This says why, so the silence watch does not report a quiet day the household already knows about."
+        }
+      ]
+    },
+    {
+      "id": "millbrook",
+      "name": "Millbrook Lane",
+      "agency_id": "northgate-care",
+      "quiet_threshold_hours": 12,
+      "usual_activity_by_hour": 11,
+      "doors": [
+        {
+          "device_id": "front_door_2",
+          "label": "Front door",
+          "is_primary": true
+        }
+      ],
+      "schedule_rules": [],
+      "timezone": "Europe/London"
+    },
+    {
+      "id": "harewood",
+      "name": "Harewood Close",
+      "agency_id": "northgate-care",
+      "quiet_threshold_hours": 12,
+      "usual_activity_by_hour": 10,
+      "doors": [
+        {
+          "device_id": "front_door_3",
+          "label": "Front door",
+          "is_primary": true
+        }
+      ],
+      "schedule_rules": [
+        {
+          "label": "Morning visit",
+          "days_of_week": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "start_time": "09:00",
+          "end_time": "09:30",
+          "active_from": "2026-09-01"
+        }
+      ],
+      "timezone": "Europe/London"
+    }
+  ]
+}

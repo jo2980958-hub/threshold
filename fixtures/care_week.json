@@ -1,0 +1,678 @@
+{
+  "_comment": "SYNTHETIC. Not captured from a real Ring device: no Ring simulator is documented anywhere, and real testing needs a US-located device on a paid Ring Protection plan. These are hand-specified events written to Ring's documented webhook envelope and signed with the real HMAC-SHA256 scheme by threshold/replay.py before delivery, so the code path they exercise is the live one. Nine days across three households and four doors, 2026-09-14 to 2026-09-22. Deliberate cases: Wednesday 16 Sept the midday window has back-door activity and none at the front, which is the key-safe case the boundary note describes; Friday 18 Sept the midday window has nothing at any door; Saturday 19 Sept is silent all day at Oakfield; millbrook stops recording after 20 Sept to exercise the silence watch; harewood linked its account on 21 Sept so everything earlier is not comparable.",
+  "events": [
+    {
+      "request_id": "evt-2026-09-14-0728-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T06:28:06+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-0805-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-14T07:05:00+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-14-0811-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T07:11:04+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-0842-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T07:42:41+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-0945-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T08:45:03+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-1136-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-14T10:36:06+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-14-1201-front_door_1-midday-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T11:01:04+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-1231-front_door_1-midday-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T11:31:42+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-1647-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T15:47:43+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-1708-front_door_1-evening-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-14T16:08:54+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-14-1715-front_door_1-evening-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T16:15:03+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-14-1742-front_door_1-evening-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-14T16:42:38+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-0718-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T06:18:09+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-0805-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-15T07:05:33+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-15-0807-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T07:07:34+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-0843-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T07:43:54+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-0908-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T08:08:17+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-1204-front_door_1-midday-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T11:04:24+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-1221-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-15T11:21:22+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-15-1226-front_door_1-midday-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T11:26:18+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-15-1802-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-15T17:02:48+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-0721-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T06:21:19+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-0801-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-16T07:01:25+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-16-0812-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T07:12:23+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-0843-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T07:43:34+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-0844-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T07:44:04+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-1203-back_door_1-back-door-midday",
+      "device_id": "back_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T11:03:07+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-1206-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-16T11:06:02+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-16-1228-back_door_1-back-door-midday-out",
+      "device_id": "back_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T11:28:19+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-1703-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T16:03:16+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-1709-front_door_1-evening-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-16T16:09:13+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-16-1711-front_door_1-evening-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T16:11:04+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-16-1744-front_door_1-evening-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-16T16:44:20+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-0722-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T06:22:40+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-0728-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T06:28:05+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-0801-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-17T07:01:11+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-17-0808-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T07:08:45+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-0842-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T07:42:49+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-1043-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-17T09:43:06+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-17-1201-front_door_1-midday-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T11:01:11+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-1226-front_door_1-midday-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T11:26:03+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-1450-front_door_1-delivery",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T13:50:51+00:00",
+      "attributes": {
+        "sub_type": "package"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-17-1948-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-17T18:48:41+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-0714-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T06:14:09+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-0802-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-18T07:02:36+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-18-0812-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T07:12:53+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-0824-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T07:24:08+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-0839-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T07:39:58+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-1207-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-18T11:07:53+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-18-1702-front_door_1-evening-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-18T16:02:45+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-18-1715-front_door_1-evening-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T16:15:16+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-1738-front_door_1-evening-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T16:38:55+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-18-1822-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-18T17:22:02+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-19-0925-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-19T08:25:53+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-19-1254-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-19T11:54:28+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-19-1952-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-19T18:52:37+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-20-0727-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-20T06:27:22+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-20-0928-front_door_2-out",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-20T08:28:27+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-20-1027-front_door_2-post",
+      "device_id": "front_door_2",
+      "event_type": "button_press",
+      "created_at": "2026-09-20T09:27:35+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-20-1505-back_door_1-family-sunday",
+      "device_id": "back_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-20T14:05:03+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-20-1817-front_door_2-back",
+      "device_id": "front_door_2",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-20T17:17:01+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-0726-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T06:26:40+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-0805-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-21T07:05:21+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-21-0809-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T07:09:52+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-0838-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T07:38:52+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-0914-front_door_3-first-ever",
+      "device_id": "front_door_3",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T08:14:22+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-1204-front_door_1-midday-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T11:04:50+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-1229-front_door_1-midday-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T11:29:00+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-1702-front_door_3-evening",
+      "device_id": "front_door_3",
+      "event_type": "button_press",
+      "created_at": "2026-09-21T16:02:28+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-21-1704-front_door_1-evening-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-21T16:04:37+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-21-1716-front_door_1-evening-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T16:16:32+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-21-1742-front_door_1-evening-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-21T16:42:13+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-0710-front_door_1-household-morning",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T06:10:23+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-0802-front_door_1-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-22T07:02:33+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-2026-09-22-0809-front_door_1-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T07:09:13+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-0831-front_door_3-today",
+      "device_id": "front_door_3",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T07:31:58+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-0841-front_door_1-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T07:41:02+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-1202-front_door_1-midday-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T11:02:02+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    },
+    {
+      "request_id": "evt-2026-09-22-1231-front_door_1-midday-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T11:31:37+00:00",
+      "attributes": {
+        "sub_type": "human"
+      }
+    }
+  ]
+}

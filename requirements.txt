@@ -1,0 +1,11 @@
+# Threshold runs on the Python standard library for everything on the
+# critical path: the store is sqlite3, the server is http.server, the
+# webhook signature is hmac. Only these two come from outside.
+
+# The Bedrock boundary in threshold/narrate.py. Imported lazily, so the
+# app still runs without it -- but the weekly narration then falls back
+# to rules-written text every time and the model never appears in a demo.
+boto3>=1.40
+
+# Tests
+pytest>=8,<10

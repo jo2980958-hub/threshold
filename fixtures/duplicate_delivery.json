@@ -1,0 +1,26 @@
+{
+  "_comment": "Ring's webhook docs say the receiver must deduplicate on request_id because Ring may redeliver. This fixture replays the same request_id twice, then a distinct event, to exercise webhook.DeliveryDeduplicator.",
+  "events": [
+    {
+      "request_id": "evt-dup-0900",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T09:00:00+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-dup-0900",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T09:00:00+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-0901-distinct",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T09:01:30+00:00",
+      "attributes": {"sub_type": "human"}
+    }
+  ]
+}

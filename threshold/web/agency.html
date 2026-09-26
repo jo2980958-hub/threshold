@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threshold: households</title>
+<link rel="stylesheet" href="/threshold.css">
+</head>
+<body>
+<div class="app-shell">
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <span class="brand-mark">T</span>
+    <span class="brand-name">Threshold</span>
+  </div>
+  <div class="top-nav-items" role="navigation" aria-label="Main">
+    <a class="top-nav-item" href="/" id="nav-day">Day</a>
+    <a class="top-nav-item" href="/history" id="nav-history">History</a>
+    <a class="top-nav-item" href="/agency" aria-current="page">Agency</a>
+  </div>
+  <div class="top-nav-right">
+    <span class="tagline-pill">a front-door log, not a verdict</span>
+  </div>
+</nav>
+
+<dl class="metrics-strip">
+  <div class="metric-col"><dt>Households</dt><dd id="m-households">&mdash;</dd></div>
+  <div class="metric-col" id="m-alert-col"><dt>In alert</dt><dd id="m-alert">&mdash;</dd></div>
+  <div class="metric-col"><dt>Away</dt><dd id="m-away">&mdash;</dd></div>
+  <div class="metric-col"><dt>Events recorded</dt><dd id="m-events">&mdash;</dd></div>
+</dl>
+
+<main class="app-main">
+  <p class="read-failed" id="read-failed" role="alert" hidden></p>
+
+  <div class="page-head">
+    <h2>Households</h2>
+    <p id="boundary-note">
+      Ordered by how long each door has been quiet, so the household that has
+      recorded nothing for longest is first. There is no ranking of households
+      against each other and no score for anybody who works here, because a
+      doorbell cannot support one.
+    </p>
+  </div>
+
+  <ul class="household-list" id="households" aria-label="Households"></ul>
+</main>
+</div>
+
+<script src="/threshold.js"></script>
+<script>
+async function load() {
+  const list = document.getElementById("households");
+  let data;
+  try {
+    data = await TH.readJson("/api/agency");
+  } catch (err) {
+    list.innerHTML = "";
+    TH.sayReadFailed(err, {});
+    return;
+  }
+  list.setAttribute(
+    "aria-label",
+    data.households.length === 1
+      ? "Households, 1 under this agency"
+      : "Households, " + data.households.length + " under this agency"
+  );
+
+  const alertCount = data.households.filter((h) => h.silence.state === "alert").length;
+  const awayCount = data.households.filter((h) => h.silence.state === "away").length;
+  const eventsTotal = data.households.reduce((sum, h) => sum + (h.events_recorded || 0), 0);
+  document.getElementById("m-households").textContent = data.households.length;
+  document.getElementById("m-alert").textContent = alertCount;
+  // Amber, not red: the same reasoning the silence watch itself uses on the
+  // day page. A quiet door across several households is still information,
+  // not an emergency roll call.
+  document.getElementById("m-alert-col").className = "metric-col" + (alertCount > 0 ? " watch" : "");
+  document.getElementById("m-away").textContent = awayCount;
+  document.getElementById("m-events").textContent = eventsTotal;
+
+  if (data.households.length === 0) {
+    list.innerHTML = '<li><span class="empty-note">No households are registered.</span></li>';
+    return;
+  }
+
+  list.innerHTML = data.households
+    .map(function (h) {
+      const link = "/?" + new URLSearchParams({ household: h.household_id }).toString();
+      const quiet =
+        h.silence.hours_since_last_activity === null
+          ? ""
+          : "<br>" + h.silence.hours_since_last_activity +
+            " hours since the last door event";
+      return (
+        '<li data-state="' + TH.escape(h.silence.state) + '">' +
+        "<div>" +
+        '<a class="name" href="' + link + '">' + TH.escape(h.name) + "</a>" +
+        '<div class="state"><span class="glyph" aria-hidden="true"></span>' +
+        "<span>" + TH.escape(h.silence.message) + "</span></div>" +
+        "</div>" +
+        '<div class="counts">' +
+        h.doors + " door" + (h.doors === 1 ? "" : "s") + " &middot; " +
+        h.events_recorded + " events recorded<br>" +
+        (h.visits_today === 0
+          ? "No visits booked today"
+          : h.visits_today + " booked today &middot; " +
+            h.visits_today_with_activity + " with door activity &middot; " +
+            h.visits_today_without_recorded_arrival + " with no arrival recorded") +
+        quiet +
+        "</div>" +
+        "</li>"
+      );
+    })
+    .join("");
+
+  // The same boundary sentence the ledger carries, appended here rather than
+  // rewritten, because an agency screen is exactly where a reader is most
+  // likely to treat a gap as a finding.
+  const note = document.getElementById("boundary-note");
+  note.textContent = note.textContent.trim() + " " + data.boundary_note;
+
+  const first = data.households[0];
+  document.getElementById("nav-day").href =
+    "/?" + new URLSearchParams({ household: first.household_id }).toString();
+  document.getElementById("nav-history").href =
+    "/history?" + new URLSearchParams({ household: first.household_id }).toString();
+}
+
+load();
+</script>
+</body>
+</html>

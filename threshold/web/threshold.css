@@ -1,0 +1,816 @@
+/* Threshold.
+
+   Design language carried over from a shared internal design language, referred
+   to here as Transmission: same tokens, same shell (top nav + metrics strip over a
+   four-column grid), same component set. The palette below is that design
+   language's actual values, not a re-tint of Threshold's old graphite-and-brass theme:
+   white ground, cool greys, one saturated purple accent, and the same
+   steady/watch/broken/off state colours Transmission uses for its cells.
+
+   The one rule this restyle does not touch: "no arrival was recorded" and
+   "front-door activity recorded" render at the same weight, in the same
+   colour, with no red and no cross mark. They are two answers to one narrow
+   sensor question, not a pass and a fail — so `--broken` (Transmission's red)
+   is used here only for a genuine system failure (the read-failed banner),
+   never to grade a visit. The silence watch's "alert" state uses `--watch`
+   (amber), not `--broken`, for the same reason: a quiet door is information,
+   not an emergency. See ATTRIBUTION.md for where the two typefaces below
+   come from. */
+
+/* Inter, vendored the same way EB Garamond was in the previous pass: a real
+   file this app carries with it rather than a system-font name hoped for.
+   Variable font, weights 400-800 in one file plus a separate italic file,
+   fetched as the Latin-subset woff2 Google Fonts itself serves. SIL Open Font
+   License 1.1; see ATTRIBUTION.md. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(fonts/Inter.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/Inter-Italic.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* JetBrains Mono, for every clock, timestamp and tabular figure: the same
+   face Transmission uses for its clock and its metrics strip. Variable font,
+   weights 400-700. SIL Open Font License 1.1; see ATTRIBUTION.md. */
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url(fonts/JetBrainsMono.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root{
+  /* Transmission's tokens.css, values unchanged. */
+  --ground:#ffffff; --surface:#f7f8fa; --surface-2:#eef0f4; --rail:#fbfbfd;
+  --line:#e3e6ec; --line-strong:#c9cedb;
+  --ink:#161a25; --ink-2:#5a6273; --ink-3:#8c94a6;
+  --accent:#4429c4; --accent-ink:#ffffff; --accent-soft:#efeaff; --accent-line:#c9bcf5;
+
+  --steady:#0d7a4a;  --steady-bg:#e8f6ee;  --steady-line:#a8ddc0;
+  --watch:#a15c00;   --watch-bg:#fdf3e2;   --watch-line:#e9c98a;
+  --broken:#b42318;  --broken-bg:#fdeceb;  --broken-line:#f0b4ae;
+  --off:#6b7280;     --off-bg:#f2f3f5;     --off-line:#d8dbe1;
+
+  --r-sm:6px; --r:10px; --r-pill:9999px;
+  --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, monospace;
+  --fs-base:14px; --lh-base:20px;
+  --nav-h:56px; --toolbar-h:52px;
+
+  --nav-bg:#2f1b7a;
+  --nav-bg-2:#4429c4;
+  --nav-ink:#ffffff;
+  --nav-ink-dim:#c9bcf5;
+  --nav-active:rgba(255,255,255,0.16);
+
+  --shadow-card:0 1px 2px rgba(22,26,37,.06), 0 1px 1px rgba(22,26,37,.04);
+  --shadow-pop:0 8px 24px rgba(22,26,37,.12);
+
+  /* Threshold-only: a reading column width for the ledger and prose, so a
+     wide monitor doesn't stretch the time axis into something unreadable.
+     The shell itself (top nav, toolbar, metrics strip) stays edge to edge,
+     exactly as Transmission's does. */
+  --content-w:1180px;
+}
+
+*{box-sizing:border-box}
+
+html{overflow-x:hidden}
+body{
+  margin:0;
+  background:var(--surface);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:var(--fs-base);
+  line-height:var(--lh-base);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+button{font:inherit; cursor:pointer}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.grotesk{font-family:var(--sans)}
+
+.visually-hidden{
+  position:absolute; width:1px; height:1px; margin:-1px;
+  padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+a{color:var(--accent)}
+a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+/* Something could not be read. It is not a finding about anybody, so it gets
+   its own quiet banner rather than reusing a state colour that means
+   something else on this page. */
+.read-failed{
+  font-family:var(--sans);
+  font-size:0.95rem;
+  line-height:1.5;
+  margin:16px 0;
+  padding:13px 16px;
+  border:1px solid var(--watch-line);
+  border-radius:var(--r);
+  background:var(--watch-bg);
+  color:#5c3600;
+}
+.read-failed[hidden]{display:none}
+
+/* --------------------------------------------------------------------- */
+/* app shell: top nav, toolbar, metrics strip -- Transmission's shell,     */
+/* values and structure carried over directly.                            */
+/* --------------------------------------------------------------------- */
+
+.app-shell{min-height:100vh; display:flex; flex-direction:column; background:var(--surface)}
+.app-main{flex:1; padding:18px 20px 40px; max-width:var(--content-w); margin:0 auto; width:100%}
+
+.top-nav{
+  height:var(--nav-h); flex:0 0 var(--nav-h);
+  background:linear-gradient(97deg, var(--nav-bg) 0%, var(--nav-bg-2) 100%);
+  color:var(--nav-ink); display:flex; align-items:center; gap:24px;
+  padding:0 20px; position:sticky; top:0; z-index:30;
+}
+.top-nav-brand{display:flex; align-items:center; gap:8px; flex:0 0 auto}
+.brand-mark{
+  width:28px; height:28px; border-radius:var(--r-sm);
+  background:var(--ground); color:var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:14px;
+}
+.brand-name{font-weight:800; font-size:15px; letter-spacing:-0.01em}
+.top-nav-items{display:flex; align-items:center; gap:2px; flex:1 1 auto}
+.top-nav-item{
+  border:none; background:transparent; color:var(--nav-ink-dim);
+  font-family:var(--sans); font-size:13.5px; font-weight:600; padding:8px 14px;
+  border-radius:var(--r-pill); display:inline-flex; align-items:center; gap:7px;
+  white-space:nowrap; text-decoration:none;
+}
+.top-nav-item:hover{color:var(--nav-ink); background:rgba(255,255,255,.09)}
+.top-nav-item[aria-current="page"]{background:var(--nav-active); color:var(--nav-ink)}
+.top-nav-right{display:flex; align-items:center; gap:10px; flex:0 0 auto}
+.tagline-pill{
+  border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.10);
+  color:#fff; font-size:12px; font-weight:600; padding:5px 12px; border-radius:var(--r-pill);
+  white-space:nowrap;
+}
+.show-chip{
+  display:flex; align-items:center; gap:8px; border:1px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.10); border-radius:var(--r-pill);
+  padding:4px 12px 4px 4px; font-size:13px; font-weight:600; color:#fff;
+  max-width:240px;
+}
+.show-avatar{
+  width:26px; height:26px; border-radius:50%; background:var(--ground);
+  color:var(--accent); display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:800; flex:none;
+}
+.show-chip span.name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+.toolbar{
+  min-height:var(--toolbar-h); background:var(--ground);
+  border-bottom:1px solid var(--line); display:flex; align-items:flex-end;
+  justify-content:space-between; gap:12px 16px; padding:10px 20px; flex-wrap:wrap;
+  position:sticky; top:var(--nav-h); z-index:20;
+}
+.toolbar-left, .toolbar-right{display:flex; align-items:flex-end; gap:10px 14px; flex-wrap:wrap}
+
+.field{display:flex; flex-direction:column; gap:4px}
+.field label{
+  font-family:var(--sans); font-size:11px; font-weight:600; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:.06em;
+}
+.field select, .field input{
+  font-family:var(--sans); font-size:13px; color:var(--ink);
+  background:var(--ground); border:1px solid var(--line-strong);
+  border-radius:var(--r-sm); padding:7px 10px; min-height:34px;
+}
+.field select:focus, .field input:focus{
+  outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);
+}
+.field input[type="search"]{min-width:15rem}
+.field input[type="time"], .field input[type="date"]{font-family:var(--mono)}
+.spacer{margin-left:auto}
+
+.btn, button, .button{
+  display:inline-flex; align-items:center; gap:7px; border:1px solid transparent;
+  border-radius:var(--r-sm); padding:8px 14px; font-family:var(--sans);
+  font-size:13px; font-weight:700; background:var(--surface-2); color:var(--ink);
+  white-space:nowrap; text-decoration:none; min-height:34px;
+}
+.btn:hover, button:hover, .button:hover{filter:brightness(0.97)}
+.btn:disabled, button:disabled, button[disabled], .button[disabled]{opacity:.5; cursor:not-allowed}
+.btn-outline, .button{background:var(--ground); border-color:var(--line); color:var(--ink-2)}
+.btn-outline:hover, .button:hover{color:var(--ink); border-color:var(--line-strong)}
+.btn-primary, button#note-save, button#weekly-refresh, button#submit{
+  background:var(--accent); color:var(--accent-ink); border-color:transparent;
+}
+.btn-primary:hover, button#note-save:hover, button#weekly-refresh:hover, button#submit:hover{
+  filter:brightness(1.06);
+}
+
+/* --------------------------------------------------------------------- */
+/* metrics strip                                                          */
+/* --------------------------------------------------------------------- */
+.metrics-strip{
+  display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:1px;
+  background:var(--line); border-bottom:1px solid var(--line); margin:0;
+}
+.metric-col{background:var(--ground); padding:11px 20px 13px; min-width:0}
+.metric-col dt{
+  font-family:var(--sans); font-size:11px; font-weight:600; color:var(--ink-3);
+  text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px;
+}
+.metric-col dd{margin:0; font-family:var(--mono); font-size:21px; font-weight:700; color:var(--ink)}
+.metric-col dd small{
+  font-size:12px; font-weight:500; color:var(--ink-3); margin-left:8px; font-family:var(--sans);
+}
+.metric-col.good dd{color:var(--steady)}
+.metric-col.watch dd{color:var(--watch)}
+.metric-col.bad dd{color:var(--broken)}
+
+/* --------------------------------------------------------------------- */
+/* cards, banners, page headers -- Transmission's primitives              */
+/* --------------------------------------------------------------------- */
+.card{
+  background:var(--ground); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow-card); margin-bottom:16px;
+}
+.card-head{padding:14px 18px 12px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap}
+.card-head h3{margin:0 0 3px; font-size:15px; font-weight:700; letter-spacing:-0.01em}
+.card-head p{margin:0; font-size:13px; color:var(--ink-2); max-width:72ch}
+.card-body{padding:0 18px 16px}
+.card-body.flush{padding:0}
+
+.page-head{margin:20px 0 14px}
+.page-head h2{margin:0 0 4px; font-size:20px; font-weight:800; letter-spacing:-0.02em; color:var(--ink)}
+.page-head p{margin:0; font-size:13.5px; color:var(--ink-2); max-width:84ch; line-height:1.6}
+
+.banner{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 16px;
+  padding:12px 16px; border-radius:var(--r); border:1px solid; margin-bottom:16px;
+  font-family:var(--sans); font-size:13.5px;
+}
+.banner .heading{
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  width:100%; color:inherit; opacity:.75;
+}
+.banner .meta{font-size:12px; opacity:.85}
+.banner.good{background:var(--steady-bg); border-color:var(--steady-line); color:#10402c}
+.banner.watch{background:var(--watch-bg); border-color:var(--watch-line); color:#5c3600}
+.banner.off{background:var(--off-bg); border-color:var(--off-line); color:var(--ink-2)}
+
+/* --------------------------------------------------------------------- */
+/* the silence watch -- a banner, state-coloured with amber (never red)   */
+/* --------------------------------------------------------------------- */
+.silence{
+  font-family:var(--sans);
+  background:var(--off-bg); border:1px solid var(--off-line);
+  border-radius:var(--r);
+  padding:12px 16px; margin-bottom:16px;
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 16px;
+  color:var(--ink-2);
+}
+.silence .heading{
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--ink-3); width:100%;
+}
+.silence .message{color:var(--ink); font-size:13.5px}
+.silence .meta{color:var(--ink-3); font-size:12px}
+.silence[data-state="within_pattern"]{background:var(--steady-bg); border-color:var(--steady-line)}
+.silence[data-state="within_pattern"] .heading{color:#10402c; opacity:.75}
+.silence[data-state="within_pattern"] .message{color:#10402c}
+/* An alert is quieter than it sounds: amber, not red -- absence of a
+   doorbell event is information, not an emergency. */
+.silence[data-state="alert"]{background:var(--watch-bg); border-color:var(--watch-line)}
+.silence[data-state="alert"] .heading{color:#5c3600; opacity:.75}
+.silence[data-state="alert"] .message{color:#5c3600; font-weight:600}
+.silence[data-state="away"]{background:var(--off-bg); border-color:var(--off-line); border-style:dashed}
+.silence[data-state="away"] .message{color:var(--ink-2)}
+
+/* --------------------------------------------------------------------- */
+/* the ledger                                                             */
+/* --------------------------------------------------------------------- */
+
+.day-label{
+  font-family:var(--sans);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-size:11px;
+  font-weight:600;
+  color:var(--ink-3);
+  margin:0 0 12px;
+}
+
+.ledger{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 248px 1fr;
+}
+.gutter{position:relative}
+/* The spine and its hour ticks hug the left edge of the gutter, against the
+   schedule column, so the note cards that sit on the axis never cover the
+   hour a reader is trying to line something up against. */
+.gutter .line{
+  position:absolute;
+  left:0;
+  top:0; bottom:0;
+  width:2px;
+  background:linear-gradient(to bottom, transparent, var(--line-strong) 5%, var(--line-strong) 95%, transparent);
+}
+/* `top` is set from JS to the same origin the two columns' lists use; see
+   alignTicksToColumns in index.html. Absolute so the ticks inside it are
+   placed against this box rather than against the gutter. */
+#ticks{position:absolute; top:0; left:0; right:0}
+.gutter .tick{
+  position:absolute;
+  left:1px;
+  transform:translate(-50%,-50%);
+  background:var(--surface);
+  padding:0 6px;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--ink-3);
+  z-index:1;
+}
+
+/* The boundary note lives inside the ledger, between the two columns, and
+   sticks to the top of the viewport as the ledger scrolls, so a viewer
+   cannot read the log without also reading what the log does not claim. */
+.boundary{
+  position:sticky;
+  top:calc(var(--nav-h) + var(--toolbar-h) + 12px);
+  margin:0 0 0 1.75rem;
+  background:var(--ground);
+  border:1px solid var(--line);
+  border-top:3px solid var(--accent);
+  border-radius:var(--r-sm);
+  box-shadow:var(--shadow-card);
+  padding:13px 14px;
+  font-family:var(--sans);
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--ink-2);
+  z-index:2;
+}
+.boundary .heading{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-weight:700;
+  color:var(--ink);
+  margin-bottom:6px;
+}
+
+.col{position:relative}
+.col.schedule{padding-right:1.25rem}
+.col.log{padding-left:1.25rem}
+.col-heading{
+  font-family:var(--sans);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:11px;
+  font-weight:600;
+  color:var(--ink-3);
+  margin-bottom:0.75rem;
+}
+.col.schedule .col-heading{text-align:right}
+.col-list{margin:0; padding:0; list-style:none; position:relative}
+
+.visit-block{
+  border-radius:var(--r-sm);
+  padding:10px 12px;
+  background:var(--ground);
+  border:1px solid var(--line);
+  border-right:3px solid var(--accent-line);
+  box-shadow:var(--shadow-card);
+}
+.visit-block .label{font-weight:700; color:var(--ink); font-size:13.5px}
+.visit-block .time{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+.visit-block .status{
+  margin-top:6px;
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  font-family:var(--sans);
+  font-size:12px;
+  font-weight:600;
+  color:var(--accent);
+}
+.visit-block .status .glyph{
+  width:9px; height:9px;
+  border-radius:50%;
+  border:1.5px solid var(--accent);
+  flex:none;
+  position:relative;
+  top:1px;
+}
+/* Both outcomes share one visual language: a hollow dot for "no arrival
+   recorded", a filled one for "activity recorded". Neither is red, neither is
+   a cross, because both are answers to the same question and not a pass/fail
+   grade on a person. */
+.visit-block.recorded .status .glyph{background:var(--accent)}
+.visit-block.not-recorded .status .glyph{background:transparent}
+.visit-block .detail{
+  margin-top:5px;
+  font-family:var(--sans);
+  font-size:12px;
+  color:var(--ink-3);
+}
+
+/* A three-part row rather than one wrapping line: the time, what was
+   recorded, and where that came from. */
+.log-entry{
+  display:grid;
+  grid-template-columns:0.4rem 3.4rem 1fr auto;
+  gap:2px 8px;
+  align-items:baseline;
+  padding:6px 8px;
+  border-radius:var(--r-sm);
+}
+.log-entry .dot{
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--ink-3);
+  position:relative;
+  top:-2px;
+}
+.log-entry .time{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--ink-3);
+}
+.log-entry .label{color:var(--ink); font-size:13px}
+.log-entry .mark{justify-self:end}
+.log-entry .door{
+  grid-column:3 / -1;
+  font-family:var(--sans);
+  font-size:12px;
+  color:var(--ink-3);
+}
+
+.empty-note{
+  color:var(--ink-3);
+  font-style:italic;
+  font-size:13px;
+  padding:1rem 0;
+}
+
+/* Desktop: entries sit at their real time of day on the spine. */
+@media (min-width: 821px){
+  .col-list.positioned > li{position:absolute; left:0; right:0}
+  .col.schedule .col-list.positioned > li{right:0; left:0}
+  /* The gutter's note list needs the same origin as the two columns, or every
+     note lands as far down the page as the boundary card above it is tall and
+     stops lining up with the visit it is about. */
+  #notes-col.positioned{
+    position:absolute;
+    top:0; left:1.75rem; right:0;
+    pointer-events:none;
+  }
+  #notes-col.positioned > li{pointer-events:auto}
+}
+
+/* Narrow: the time axis becomes a plain chronological list. Absolute
+   positioning by time of day is a wide-screen affordance; at 390px two events
+   a minute apart cannot both sit at their own height without colliding, and a
+   list is what a phone wants anyway. */
+@media (max-width: 820px){
+  .top-nav{gap:8px; padding:0 10px}
+  .top-nav-items{gap:0; min-width:0}
+  .top-nav-item{padding:7px 9px; font-size:12.5px}
+  .top-nav-right{gap:6px; min-width:0}
+  /* The tagline pill is decorative -- the boundary sentence and the legend
+     say the same thing in full below -- so it is the first thing to go when
+     the bar cannot hold everything at once. */
+  .tagline-pill{display:none}
+  .show-chip{max-width:150px; padding:3px 8px 3px 3px}
+  .show-chip span.name{max-width:90px}
+  .toolbar{padding:10px 12px; position:static}
+  .top-nav{position:sticky}
+  .metrics-strip{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .ledger{grid-template-columns:1fr}
+  .gutter{order:2}
+  .gutter .line, .gutter .tick{display:none}
+  .col.schedule{order:1; padding-right:0}
+  .col.log{order:3; padding-left:0}
+  .col.schedule .col-heading{text-align:left}
+  .col-list{display:flex; flex-direction:column; gap:0.85rem}
+  .boundary{margin:1.5rem 0; position:sticky; top:0}
+  .app-main{padding:14px 12px 32px}
+  .field input[type="search"]{min-width:0; width:100%}
+  .field{width:100%}
+}
+
+/* --------------------------------------------------------------------- */
+/* the weekly summary                                                     */
+/* --------------------------------------------------------------------- */
+
+.weekly{
+  margin-top:2.5rem;
+}
+.weekly h2{
+  font-size:1.05rem;
+  font-weight:800;
+  letter-spacing:-0.01em;
+  margin:0 0 0.15rem;
+  color:var(--ink);
+}
+.weekly .summary-text{
+  font-size:1rem;
+  line-height:1.7;
+  max-width:68ch;
+  margin:1rem 0;
+  color:var(--ink);
+}
+.weekly .provenance{
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--ink-2);
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px 16px;
+  padding:10px 14px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+}
+.weekly .provenance code{font-family:var(--mono); font-size:12px; color:var(--accent)}
+.weekly .rejected{
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:#5c3600;
+  background:var(--watch-bg);
+  border:1px solid var(--watch-line);
+  border-radius:var(--r-sm);
+  padding:11px 14px;
+  margin-top:10px;
+  line-height:1.55;
+}
+.facts{
+  margin-top:1.25rem;
+  font-family:var(--sans);
+  font-size:12.5px;
+}
+.facts summary{cursor:pointer; color:var(--ink-2); padding:6px 0; font-weight:600}
+.facts dl{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+  gap:12px 24px;
+  margin:0.75rem 0 0;
+  padding:14px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+}
+.facts dt{color:var(--ink-3); font-size:11px; text-transform:uppercase; letter-spacing:.06em}
+.facts dd{margin:0.25rem 0 0; color:var(--ink); font-size:15px; font-family:var(--mono); font-weight:700}
+
+/* --------------------------------------------------------------------- */
+/* tabular surfaces (history, agency)                                     */
+/* --------------------------------------------------------------------- */
+
+.record-list{list-style:none; margin:0; padding:0; border-top:1px solid var(--line)}
+.record-list > li{
+  display:grid;
+  grid-template-columns:9.5rem 1fr auto;
+  gap:4px 16px;
+  align-items:baseline;
+  padding:10px 4px;
+  border-bottom:1px solid var(--line);
+}
+.record-list .when{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+.record-list .what{color:var(--ink); font-size:13.5px}
+.record-list .where{font-family:var(--sans); font-size:12px; color:var(--ink-3)}
+
+.household-list{list-style:none; margin:0; padding:0}
+.household-list > li{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px 24px;
+  padding:16px 0;
+  border-bottom:1px solid var(--line);
+}
+.household-list .name{font-size:15px; font-weight:700; color:var(--ink); text-decoration:none}
+.household-list .name:hover{color:var(--accent)}
+.household-list .state{
+  font-family:var(--sans);
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--accent);
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  margin-top:0.3rem;
+}
+.household-list .state .glyph{
+  width:9px; height:9px; border-radius:50%;
+  border:1.5px solid var(--accent); flex:none;
+}
+.household-list li[data-state="alert"] .state{color:var(--watch)}
+.household-list li[data-state="alert"] .state .glyph{background:var(--watch); border-color:var(--watch)}
+.household-list li[data-state="within_pattern"] .state{color:var(--steady)}
+.household-list li[data-state="within_pattern"] .state .glyph{background:var(--steady); border-color:var(--steady)}
+.household-list .counts{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--ink-3);
+  text-align:right;
+  line-height:1.8;
+}
+@media (max-width: 620px){
+  .record-list > li{grid-template-columns:1fr}
+  .household-list > li{grid-template-columns:1fr}
+  .household-list .counts{text-align:left}
+}
+
+.pager{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  margin-top:1.25rem;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--ink-3);
+}
+
+.page-note{
+  font-family:var(--sans);
+  font-size:13px;
+  line-height:1.6;
+  color:var(--ink-2);
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:13px 16px;
+  margin:0 0 1.5rem;
+  max-width:92ch;
+}
+
+/* --------------------------------------------------------------------- */
+/* provenance, as a printed word                                          */
+/* --------------------------------------------------------------------- */
+
+/* RECORDED / REPORTED / INFERRED are set in type, never in colour alone --
+   RECORDED solid-bordered, REPORTED dashed, INFERRED dotted -- so the
+   distinction survives a photocopier, a colour-blind reader and a fax.
+   Practice Direction 32 paragraph 18.2 has required filers to separate their
+   own knowledge from information and belief since 1999; this is the same
+   distinction for the same reason. */
+.mark{
+  font-family:var(--sans);
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink-3);
+  border:1px solid var(--line-strong);
+  border-radius:3px;
+  padding:2px 6px;
+  white-space:nowrap;
+  flex:none;
+}
+.mark[data-mark="RECORDED"]{ color:var(--ink); border-color:var(--accent); }
+.mark[data-mark="REPORTED"]{ border-style:dashed; }
+.mark[data-mark="INFERRED"]{ border-style:dotted; }
+
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 24px;
+  font-family:var(--sans);
+  font-size:12.5px;
+  color:var(--ink-2);
+  margin:0 0 16px;
+  padding:12px 16px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  line-height:1.5;
+}
+.legend > div{ display:flex; align-items:baseline; gap:8px; max-width:30ch; }
+
+/* --------------------------------------------------------------------- */
+/* what the household wrote                                               */
+/* --------------------------------------------------------------------- */
+
+.note{
+  background:var(--ground);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent);
+  border-radius:var(--r-sm);
+  padding:10px 12px;
+  box-shadow:var(--shadow-card);
+}
+.note .who{
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  flex-wrap:wrap;
+  font-family:var(--sans);
+  font-size:12px;
+  color:var(--ink-3);
+  margin-bottom:6px;
+}
+/* Always a quotation, never the app's own sentence. */
+.note blockquote{
+  margin:0;
+  font-style:italic;
+  color:var(--ink);
+  font-size:13.5px;
+  line-height:1.5;
+}
+.note blockquote::before{ content:"\201C"; }
+.note blockquote::after{ content:"\201D"; }
+
+/* The note input takes 2,000 characters and the gutter is 248px wide, so the
+   longest note the app accepts is a 1,400px ribbon. Clamped to eight lines
+   with the rest one press away, because a note is the household's own words
+   and truncating them silently would be the wrong kind of tidy. */
+.note blockquote.clamped{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:8;
+  line-clamp:8;
+  overflow:hidden;
+}
+.note.open blockquote.clamped{
+  display:block;
+  overflow:visible;
+}
+.note-more{
+  display:block;
+  margin-top:7px;
+  padding:0;
+  background:none;
+  border:0;
+  border-bottom:1px solid var(--accent-line);
+  border-radius:0;
+  color:var(--accent);
+  font-family:var(--sans);
+  font-size:11.5px;
+  font-weight:600;
+  cursor:pointer;
+  min-height:0;
+}
+.note-more:hover{color:var(--ink); filter:none}
+.note-more:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* Below the ledger, not inside the gutter: a disclosure control sitting on
+   the time axis collides with whatever hour it lands on. */
+.add-note{
+  margin-top:1.5rem;
+  font-family:var(--sans);
+  border-top:1px solid var(--line);
+  padding-top:1rem;
+}
+.add-note .fields{max-width:52ch}
+.add-note summary{
+  cursor:pointer;
+  color:var(--accent);
+  font-size:13px;
+  font-weight:600;
+  padding:0.4rem 0;
+}
+.add-note .fields{ display:flex; flex-direction:column; gap:0.6rem; margin-top:0.6rem; }
+.add-note textarea{
+  font-family:var(--sans);
+  font-size:13.5px;
+  background:var(--ground);
+  color:var(--ink);
+  border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);
+  padding:10px 12px;
+  min-height:5rem;
+  resize:vertical;
+}
+.add-note textarea:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.add-note .why{ font-size:12.5px; color:var(--ink-2); line-height:1.5; }
+.add-note .row{ display:flex; gap:0.5rem; }
+.add-note input{
+  font-family:var(--sans);
+  font-size:13px;
+  background:var(--ground);
+  color:var(--ink);
+  border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);
+  padding:8px 10px;
+  min-width:0;
+  flex:1;
+}
+.add-note input:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.add-note .said{ font-size:12.5px; color:var(--accent); min-height:1rem; font-weight:600 }

@@ -1,0 +1,61 @@
+{
+  "_comment": "A replayed, HMAC-signed day of front-door webhook events for device front_door_1, matching Ring's documented motion_detected/button_press envelope. Not captured from a real device (no Ring simulator exists); hand-built to the documented shape. The midday window (12:00-12:30) is deliberately left with zero events: this is the demo's central point. A real visit may have happened through a key safe or a back door the camera never sees, and the product must say only that no arrival was recorded, never that the carer did not come.",
+  "events": [
+    {
+      "request_id": "evt-0712-household-out",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T07:12:04+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-0804-morning-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-22T08:04:11+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-0805-morning-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T08:05:02+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-0842-morning-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T08:42:37+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-1415-delivery",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T14:15:52+00:00",
+      "attributes": {"sub_type": "package"}
+    },
+    {
+      "request_id": "evt-1703-evening-bell",
+      "device_id": "front_door_1",
+      "event_type": "button_press",
+      "created_at": "2026-09-22T17:03:19+00:00",
+      "attributes": {}
+    },
+    {
+      "request_id": "evt-1744-evening-departure",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T17:44:08+00:00",
+      "attributes": {"sub_type": "human"}
+    },
+    {
+      "request_id": "evt-1930-family-home",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T19:30:45+00:00",
+      "attributes": {"sub_type": "human"}
+    }
+  ]
+}

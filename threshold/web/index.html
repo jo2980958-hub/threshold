@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threshold: front-door log</title>
+<link rel="stylesheet" href="/threshold.css">
+</head>
+<body>
+<div class="app-shell">
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <span class="brand-mark">T</span>
+    <span class="brand-name">Threshold</span>
+  </div>
+  <div class="top-nav-items" role="navigation" aria-label="Main">
+    <a class="top-nav-item" href="/" aria-current="page">Day</a>
+    <a class="top-nav-item" href="/history" id="nav-history">History</a>
+    <a class="top-nav-item" href="/agency" id="nav-agency">Agency</a>
+  </div>
+  <div class="top-nav-right">
+    <span class="tagline-pill">a front-door log, not a verdict</span>
+    <span class="show-chip"><span class="show-avatar" id="household-avatar">&nbsp;</span><span class="name" id="household-chip-name">&hellip;</span></span>
+  </div>
+</nav>
+
+<div class="toolbar">
+  <div class="toolbar-left">
+    <div class="field">
+      <label for="household">Household</label>
+      <select id="household"></select>
+    </div>
+    <div class="field">
+      <label for="date">Day</label>
+      <input type="date" id="date">
+    </div>
+    <div class="field">
+      <label for="door">Door</label>
+      <select id="door"><option value="">All doors</option></select>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <a class="btn btn-outline" id="export-report" href="#" title="Take this day to the agency as a plain-text report">Report</a>
+    <a class="btn btn-outline" id="export-csv" href="#" title="Take this day to the agency as CSV">CSV</a>
+  </div>
+</div>
+
+<dl class="metrics-strip">
+  <div class="metric-col"><dt>Household</dt><dd id="m-household">&mdash;</dd></div>
+  <div class="metric-col"><dt>Day</dt><dd id="m-day">&mdash;</dd></div>
+  <div class="metric-col"><dt>Doors recording</dt><dd id="m-doors">&mdash;</dd></div>
+  <div class="metric-col" id="m-silence-col"><dt>Silence watch</dt><dd id="m-silence">&mdash;</dd></div>
+</dl>
+
+<main class="app-main">
+  <p class="read-failed" id="read-failed" role="alert" hidden></p>
+
+  <div class="silence" id="silence" role="status" aria-live="polite" data-state="">
+    <span class="heading">Silence watch</span>
+    <span class="message" id="silence-message">Checking this household&rsquo;s door record&hellip;</span>
+    <span class="meta" id="silence-meta"></span>
+  </div>
+
+  <h2 class="day-label" id="day-label">Loading&hellip;</h2>
+
+  <!-- Provenance is printed as a word, never encoded in a colour, so it
+       survives a photocopier and a colour-blind reader. -->
+  <div class="legend" id="legend" aria-label="How to read this page"></div>
+
+  <section class="ledger" id="ledger" aria-labelledby="day-label">
+    <div class="col schedule">
+      <h3 class="col-heading" id="schedule-heading">Care schedule</h3>
+      <ul class="col-list" id="schedule-col" aria-labelledby="schedule-heading"></ul>
+    </div>
+
+    <div class="gutter" aria-hidden="false">
+      <div class="line" aria-hidden="true"></div>
+      <div id="ticks" aria-hidden="true"></div>
+      <!-- SPEC.md: the boundary note sits inside the ledger between the two
+           columns, not as a footnote below them, so a viewer cannot read the
+           log without also reading what the log does not claim. It is sticky
+           so a long day cannot scroll it away either. -->
+      <aside class="boundary" id="boundary">
+        <span class="heading">What this is</span>
+        <span id="boundary-text">A record of the front door, not of who provided care.</span>
+      </aside>
+
+      <!-- The other side of the day. The doorbell cannot see a key safe, a side
+           entrance, or somebody arriving with a family member. These are the
+           people who live there writing in what it could not see: quoted,
+           attributed, marked REPORTED, and never changing what the door says. -->
+      <ul class="col-list" id="notes-col" aria-labelledby="notes-heading"></ul>
+      <h3 class="visually-hidden" id="notes-heading">What the household wrote</h3>
+    </div>
+
+    <div class="col log">
+      <h3 class="col-heading" id="log-heading">Front-door activity</h3>
+      <ul class="col-list" id="log-col" aria-labelledby="log-heading"></ul>
+    </div>
+
+  </section>
+
+  <details class="add-note">
+  <summary>Add what the door could not see</summary>
+  <div class="fields">
+  <p class="why">
+  The doorbell records a door, not a visit. If somebody came through a
+  key safe or the back, write it here. Your words are kept as yours,
+  quoted and signed, and they never change what the log says the
+  doorbell recorded.
+  </p>
+  <label class="visually-hidden" for="note-text">What happened</label>
+  <textarea id="note-text" placeholder="She came at about ten past, I let her in the back."></textarea>
+  <div class="row">
+  <label class="visually-hidden" for="note-author">Your name</label>
+  <input id="note-author" placeholder="Your name">
+  <label class="visually-hidden" for="note-time">Time</label>
+  <input id="note-time" type="time">
+  </div>
+  <button id="note-save" type="button">Add to this day</button>
+  <p class="said" id="note-said" role="status" aria-live="polite"></p>
+  </div>
+  </details>
+
+  <section class="weekly" aria-labelledby="weekly-heading">
+    <h2 id="weekly-heading">The week, in plain language</h2>
+    <p class="day-label" id="weekly-range"></p>
+
+    <p class="summary-text" id="weekly-text">Loading this week&rsquo;s summary&hellip;</p>
+
+    <div class="provenance" id="weekly-provenance">
+      <span id="weekly-source">&nbsp;</span>
+      <button id="weekly-refresh" type="button">Rewrite this summary</button>
+    </div>
+
+    <div class="rejected" id="weekly-rejected" hidden></div>
+
+    <details class="facts">
+      <summary>The numbers this summary was written from</summary>
+      <dl id="weekly-facts"></dl>
+      <p class="page-note" style="margin-top:1rem">
+        Every figure above was computed by the rules in
+        <code>threshold/digest.py</code> from the door log and the booked schedule,
+        before any model was called. The model is given these figures and asked to
+        write them as sentences. It cannot add a number that is not here: any number
+        it produces that the rules did not compute is refused. It is then told which
+        rule it broke and asked once more; if the second draft is refused too, the
+        summary shown is the one the rules wrote.
+      </p>
+    </details>
+  </section>
+</main>
+</div>
+
+<script src="/threshold.js"></script>
+<script>
+const DAY_TOP = 44;          // px below the column heading where 'day start' sits
+const DAY_MIN_HEIGHT = 560;  // px for the mapped band, before decluttering
+let STATE = { household: null, date: null, deviceId: null, band: [6, 22], noteStamps: [] };
+
+// Printed words, not colours. Practice Direction 32 paragraph 18.2 has required
+// filers to separate their own knowledge from information and belief since 1999;
+// this page needs the same distinction for the same reason.
+const LEGEND = {
+  RECORDED: "A sensor at the door fired. Says nothing about who.",
+  REPORTED: "Somebody said so: Ring's classification, or a note from the household.",
+  INFERRED: "Worked out by this app's rules from the recorded events.",
+};
+
+function yFor(iso, band) {
+  const d = new Date(iso);
+  const mins = d.getUTCHours() * 60 + d.getUTCMinutes();
+  const lo = band[0] * 60, hi = band[1] * 60;
+  const clamped = Math.min(Math.max(mins, lo), hi);
+  return DAY_TOP + ((clamped - lo) / (hi - lo)) * DAY_MIN_HEIGHT;
+}
+
+/* The band is taken from the day's own data rather than fixed at 6am-10pm, so
+   a 4am event has somewhere to sit instead of being clamped onto the top of
+   the ledger and silently reading as 6am. */
+function bandFor(events, comparisons) {
+  let lo = 6, hi = 22;
+  const stamps = events.map((e) => e.occurred_at)
+    .concat(comparisons.map((c) => c.scheduled_start))
+    .concat(comparisons.map((c) => c.scheduled_end));
+  stamps.forEach((iso) => {
+    const h = new Date(iso).getUTCHours();
+    if (h < lo) lo = h;
+    if (h + 1 > hi) hi = Math.min(h + 1, 24);
+  });
+  return [lo, hi];
+}
+
+function buildTicks(band) {
+  const ticks = document.getElementById("ticks");
+  ticks.innerHTML = "";
+  const step = band[1] - band[0] > 14 ? 2 : 1;
+  for (let hour = band[0]; hour <= band[1]; hour += step) {
+    const el = document.createElement("div");
+    el.className = "tick";
+    const iso = `2000-01-01T${String(Math.min(hour, 23)).padStart(2, "0")}:00:00Z`;
+    el.style.top = yFor(iso, band) + "px";
+    let h12 = hour % 12;
+    if (h12 === 0) h12 = 12;
+    el.textContent = h12 + (hour >= 12 && hour < 24 ? "pm" : "am");
+    ticks.appendChild(el);
+  }
+}
+
+/* The hour ticks and the event rows both come out of `yFor`, but they are laid
+   out inside different boxes: a tick is absolute within `.gutter`, which starts
+   at the top of the ledger, while a row is absolute within `.col-list`, which
+   starts below its column heading. So the two agreed on the arithmetic and
+   disagreed on where zero was, by the height of a heading and its margin, and
+   every event drew about two and a half hours late against the axis beside it.
+   A 17:17 event rendered below the 18:00 line, which is the kind of wrong that
+   a reader trusts the picture over the label about.
+
+   The offset is measured rather than written down, because it is the sum of a
+   font size, a line height and a margin, and any of the three can be changed by
+   somebody who has no idea this depends on them. The same bug was already found
+   and fixed for `#notes-col` in the stylesheet; this is its other half. */
+function alignTicksToColumns() {
+  const ticks = document.getElementById("ticks");
+  const gutter = ticks.parentElement;
+  const reference = document.getElementById("log-col");
+  if (!TH.isWide()) {
+    ticks.style.top = "";
+    return;
+  }
+  const delta = reference.getBoundingClientRect().top - gutter.getBoundingClientRect().top;
+  ticks.style.top = delta + "px";
+}
+
+/* Place a list's items on the time axis, and grow the list to hold them.
+
+   Only on wide screens: below 821px the CSS turns both columns into ordinary
+   chronological lists, because two events a minute apart cannot both sit at
+   their own height on a 390px-wide column without colliding, and a list is
+   what a phone wants anyway. */
+function placeOnAxis(listEl, stamps, band, minPad) {
+  const items = Array.from(listEl.children);
+  if (!TH.isWide() || items.length === 0) {
+    listEl.classList.remove("positioned");
+    items.forEach((li) => (li.style.top = ""));
+    listEl.style.height = "";
+    return;
+  }
+  const heights = items.map((li) => li.offsetHeight);
+  listEl.classList.add("positioned");
+  const tops = TH.declutter(stamps.map((s) => yFor(s, band)), heights, minPad);
+  items.forEach((li, i) => (li.style.top = tops[i] + "px"));
+  // Absolutely positioned children do not give their parent a height, so the
+  // spine would stop short of the last entry on a cluttered day. Set it.
+  const bottom = Math.max.apply(null, tops.map((t, i) => t + heights[i]));
+  listEl.style.height = Math.max(bottom + 24, DAY_TOP + DAY_MIN_HEIGHT) + "px";
+}
+
+function renderSilence(silence) {
+  const box = document.getElementById("silence");
+  box.dataset.state = silence.state;
+  document.getElementById("silence-message").textContent = silence.message;
+  const meta = [];
+  if (silence.last_activity_at) {
+    meta.push("Last recorded at the door: " + TH.fmtTime(silence.last_activity_at) +
+      " on " + silence.last_activity_at.slice(0, 10));
+  }
+  meta.push("Quiet threshold for this household: " + silence.threshold_hours + " hours");
+  document.getElementById("silence-meta").textContent = meta.join("  ·  ");
+
+  // The metrics strip's fourth column is the same watch, read at a glance.
+  // Amber for "alert", never red: a quiet door is information, not an
+  // emergency, and the strip is not allowed to say otherwise just because it
+  // is terser than the banner below it.
+  const SILENCE_LABEL = {
+    alert: "Alert", within_pattern: "Steady", away: "Away", not_enough_history: "New household",
+  };
+  const SILENCE_CLASS = { alert: "watch", within_pattern: "good" };
+  document.getElementById("m-silence").textContent = SILENCE_LABEL[silence.state] || silence.state;
+  document.getElementById("m-silence-col").className =
+    "metric-col" + (SILENCE_CLASS[silence.state] ? " " + SILENCE_CLASS[silence.state] : "");
+}
+
+/* Initials for the household avatar in the top-nav chip: the first letter of
+   the first two words, so "Oakfield Road" reads "OR" and a one-word name
+   still shows something. */
+function initials(name) {
+  const letters = String(name || "").trim().split(/\s+/).slice(0, 2).map((w) => w[0] || "");
+  return letters.join("").toUpperCase() || "?";
+}
+
+function renderSchedule(comparisons, band) {
+  const col = document.getElementById("schedule-col");
+  col.innerHTML = "";
+  col.setAttribute(
+    "aria-label",
+    comparisons.length === 1 ? "Care schedule, 1 booked visit"
+      : "Care schedule, " + comparisons.length + " booked visits"
+  );
+  if (comparisons.length === 0) {
+    col.innerHTML = '<li class="empty-note">No care visits are booked for this day.</li>';
+    return;
+  }
+  comparisons.forEach((c) => {
+    const li = document.createElement("li");
+    li.className = "visit-block " +
+      (c.status.indexOf("Front-door activity recorded") === 0 ? "recorded" : "not-recorded");
+    const detail = c.door_event_count
+      ? `<div class="detail">${c.door_event_count} door event${c.door_event_count === 1 ? "" : "s"}` +
+        (c.minutes_with_activity !== null
+          ? `, spanning ${c.minutes_with_activity} minute${c.minutes_with_activity === 1 ? "" : "s"}`
+          : "") + `.</div>`
+      : "";
+    li.innerHTML =
+      `<div class="label">${TH.escape(c.label)}</div>` +
+      `<div class="time">${TH.fmtTime(c.scheduled_start)}&ndash;${TH.fmtTime(c.scheduled_end)}</div>` +
+      `<div class="status"><span class="glyph" aria-hidden="true"></span>` +
+      `<span>${TH.escape(c.status)}</span></div>` +
+      `<div class="detail"><span class="mark" data-mark="${TH.escape(c.provenance)}">` +
+      `${TH.escape(c.provenance)}</span></div>` + detail;
+    col.appendChild(li);
+  });
+  placeOnAxis(col, comparisons.map((c) => c.scheduled_start), band, 24);
+}
+
+function renderLog(events, band) {
+  const col = document.getElementById("log-col");
+  col.innerHTML = "";
+  col.setAttribute(
+    "aria-label",
+    events.length === 1 ? "Front-door activity, 1 event"
+      : "Front-door activity, " + events.length + " events"
+  );
+  if (events.length === 0) {
+    col.innerHTML = '<li class="empty-note">No door activity was recorded on this day.</li>';
+    return;
+  }
+  events.forEach((e) => {
+    const li = document.createElement("li");
+    li.className = "log-entry";
+    li.innerHTML =
+      `<span class="dot" aria-hidden="true"></span>` +
+      `<span class="time">${TH.fmtTime(e.occurred_at)}</span>` +
+      `<span class="label">${TH.escape(e.label)}</span>` +
+      `<span class="mark" data-mark="${TH.escape(e.label_provenance)}">` +
+      `${TH.escape(e.label_provenance)}</span>` +
+      `<span class="door">${TH.escape(e.door)}</span>`;
+    col.appendChild(li);
+  });
+  placeOnAxis(col, events.map((e) => e.occurred_at), band, 10);
+}
+
+function renderLegend() {
+  document.getElementById("legend").innerHTML = Object.keys(LEGEND)
+    .map((mark) =>
+      `<div><span class="mark" data-mark="${mark}">${mark}</span>` +
+      `<span>${TH.escape(LEGEND[mark])}</span></div>`)
+    .join("");
+}
+
+function renderNotes(notes, band) {
+  const col = document.getElementById("notes-col");
+  col.innerHTML = "";
+  col.setAttribute(
+    "aria-label",
+    notes.length === 1
+      ? "What the household wrote, 1 note"
+      : "What the household wrote, " + notes.length + " notes"
+  );
+  STATE.noteStamps = notes.map((n) =>
+    n.at_time ? `2000-01-01T${n.at_time}:00Z` : `2000-01-01T${band[1]}:00:00Z`);
+  if (notes.length === 0) {
+    positionNotes(band);
+    return;
+  }
+
+  notes.forEach((n, i) => {
+    const li = document.createElement("li");
+    li.className = "note";
+    li.innerHTML =
+      `<div class="who"><span class="mark" data-mark="REPORTED">REPORTED</span>` +
+      `<span>${TH.escape(n.lead_in)}</span></div>` +
+      `<blockquote id="note-quote-${i}" class="clamped">${TH.escape(n.quote)}</blockquote>`;
+    col.appendChild(li);
+  });
+
+  // The note input takes 2,000 characters and the gutter is 248px wide, so the
+  // longest note this app accepts renders as a 1,400px ribbon. It is clamped
+  // to eight lines, and it says so: these are the household's own words and
+  // truncating them without saying so would be the wrong kind of tidy.
+  // Measured after the cards are in the document, so a clamp that did not
+  // clamp anything leaves no button offering to expand it.
+  Array.from(col.children).forEach((li) => {
+    const quote = li.querySelector("blockquote");
+    if (quote.scrollHeight <= quote.clientHeight + 1) {
+      quote.classList.remove("clamped");
+      return;
+    }
+    li.appendChild(expandButton(li, quote, band));
+  });
+
+  positionNotes(band);
+}
+
+function expandButton(li, quote, band) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "note-more";
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-controls", quote.id);
+  button.textContent = "Read the whole note";
+  button.addEventListener("click", function () {
+    const open = li.classList.toggle("open");
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+    button.textContent = open ? "Show less of this note" : "Read the whole note";
+    positionNotes(band);
+  });
+  return button;
+}
+
+/* Places the note cards on the time axis, and makes the ledger row tall enough
+   to hold them.
+
+   The second half is what was missing. `#notes-col.positioned` is absolutely
+   positioned inside `.gutter` (threshold.css), so a height set on the list
+   itself contributes nothing to the grid row: a long note escaped the ledger
+   entirely, ran down the rest of the document and covered the middle third of
+   every line of the weekly summary. `.gutter` is the grid item, so the height
+   has to reach it. */
+function positionNotes(band) {
+  const col = document.getElementById("notes-col");
+  const gutter = col.parentElement;
+  const items = Array.from(col.children);
+  if (!TH.isWide() || items.length === 0) {
+    col.classList.remove("positioned");
+    items.forEach((li) => (li.style.top = ""));
+    col.style.height = "";
+    gutter.style.minHeight = "";
+    return;
+  }
+  // Anchor a timed note beside the hour it is about, but never above the
+  // boundary card's resting position, which has to stay readable.
+  const floor = DAY_TOP + (document.getElementById("boundary").offsetHeight || 0) + 24;
+  const heights = items.map((li) => li.offsetHeight);
+  col.classList.add("positioned");
+  const tops = TH.declutter(
+    STATE.noteStamps.map((iso) => Math.max(yFor(iso, band), floor)), heights, 12);
+  items.forEach((li, i) => (li.style.top = tops[i] + "px"));
+  const bottom = Math.max.apply(null, tops.map((t, i) => t + heights[i])) + 24;
+  col.style.height = bottom + "px";
+  gutter.style.minHeight = bottom + "px";
+}
+
+async function saveNote() {
+  const said = document.getElementById("note-said");
+  const body = {
+    household: STATE.household,
+    occurred_on: STATE.date,
+    text: document.getElementById("note-text").value,
+    author: document.getElementById("note-author").value,
+    at_time: document.getElementById("note-time").value || null,
+  };
+  const res = await fetch("/api/notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    said.textContent = data.error;
+    return;
+  }
+  said.textContent = "Added, in your words, signed by you.";
+  document.getElementById("note-text").value = "";
+  await loadDay();
+}
+
+function renderDoors(household) {
+  const select = document.getElementById("door");
+  const current = STATE.deviceId || "";
+  select.innerHTML =
+    '<option value="">All doors (' + household.doors.length + ")</option>" +
+    household.doors.map((d) =>
+      `<option value="${TH.escape(d.device_id)}"${d.device_id === current ? " selected" : ""}>` +
+      `${TH.escape(d.label)}</option>`).join("");
+
+  document.getElementById("household-chip-name").textContent = household.name;
+  document.getElementById("household-avatar").textContent = initials(household.name);
+  document.getElementById("m-household").textContent = household.name;
+  document.getElementById("m-doors").textContent = household.doors.length;
+}
+
+function renderFacts(facts) {
+  const rows = [
+    ["Events recorded", facts.total_events],
+    ["Days with no activity", facts.quiet_days.length],
+    ["Visits booked", facts.visits_scheduled],
+    ["With door activity", facts.visits_with_activity],
+    ["No arrival recorded", facts.visits_without_recorded_arrival],
+    ["Not comparable", facts.visits_not_comparable],
+    ["Doors recording", facts.door_count],
+  ];
+  document.getElementById("weekly-facts").innerHTML = rows
+    .map(([k, v]) => `<div><dt>${TH.escape(k)}</dt><dd>${TH.escape(v)}</dd></div>`)
+    .join("");
+}
+
+async function loadWeekly(refresh) {
+  const text = document.getElementById("weekly-text");
+  const rejected = document.getElementById("weekly-rejected");
+  const button = document.getElementById("weekly-refresh");
+  button.disabled = true;
+  if (refresh) text.textContent = "Asking Amazon Bedrock to rewrite this week…";
+
+  const qs = new URLSearchParams({ household: STATE.household });
+  if (STATE.date) qs.set("week_of", STATE.date);
+  if (refresh) qs.set("refresh", "1");
+  let data;
+  try {
+    data = await TH.readJson("/weekly?" + qs.toString());
+  } catch (err) {
+    TH.sayReadFailed(err, {
+      "weekly-text": "This week's summary could not be read.",
+    });
+    button.disabled = false;
+    return;
+  }
+
+  text.textContent = data.text;
+  document.getElementById("weekly-range").textContent =
+    "Week beginning " + TH.fmtDate(data.week_start);
+
+  const source = document.getElementById("weekly-source");
+  if (data.source === "bedrock") {
+    source.innerHTML = "Written by Amazon Bedrock, <code>" + TH.escape(data.model_id) +
+      "</code>, from figures the rules computed. Checked against " +
+      "<code>threshold/phrasing.py</code> before it was shown." +
+      (data.cached ? " Cached." : "");
+  } else {
+    source.innerHTML = "Written by the rules in <code>threshold/digest.py</code>. " +
+      "No model wrote this sentence." + (data.cached ? " Cached." : "");
+  }
+
+  // The wording comes from threshold/provenance.py, which knows whether the
+  // refused draft is the one on screen. Composing it here from
+  // `rejected_reason` alone is how this panel came to say "Written by Amazon
+  // Bedrock" and "the summary above is the one the rules wrote instead" two
+  // lines apart.
+  if (data.gate_notice) {
+    rejected.hidden = false;
+    rejected.textContent = data.gate_notice;
+  } else {
+    rejected.hidden = true;
+  }
+
+  renderFacts(data.facts);
+  button.disabled = false;
+}
+
+async function loadDay() {
+  const qs = new URLSearchParams({ household: STATE.household });
+  if (STATE.date) qs.set("date", STATE.date);
+  if (STATE.deviceId) qs.set("device_id", STATE.deviceId);
+  let data;
+  try {
+    data = await TH.readJson("/day?" + qs.toString());
+  } catch (err) {
+    TH.sayReadFailed(err, {
+      "day-label": "This day could not be read.",
+      "silence-message": "The silence watch has nothing to report on, because this day could not be read.",
+    });
+    return false;
+  }
+
+  STATE.date = data.date;
+  document.getElementById("date").value = data.date;
+  document.getElementById("day-label").textContent = TH.fmtDate(data.date);
+  document.getElementById("m-day").textContent = data.date;
+  document.getElementById("boundary-text").textContent = data.boundary_note_short;
+  document.getElementById("boundary").title = data.boundary_note;
+
+  renderDoors(data.household);
+  renderSilence(data.silence);
+
+  const band = bandFor(data.events, data.comparisons);
+  STATE.band = band;
+  buildTicks(band);
+  renderSchedule(data.comparisons, band);
+  renderLog(data.events, band);
+  renderNotes(data.notes || [], band);
+  // After the columns exist, so the heading it measures against is rendered.
+  alignTicksToColumns();
+  wireExports();
+  return true;
+}
+
+function wireExports() {
+  const range = new URLSearchParams({
+    household: STATE.household,
+    from: STATE.date,
+    to: STATE.date,
+  }).toString();
+  document.getElementById("export-report").href = "/export.txt?" + range;
+  document.getElementById("export-csv").href = "/export.csv?" + range;
+  const link = new URLSearchParams({ household: STATE.household }).toString();
+  document.getElementById("nav-history").href = "/history?" + link;
+  document.getElementById("nav-agency").href = "/agency?" + link;
+}
+
+function relayout() {
+  if (!STATE.date) return;
+  loadDay();
+}
+
+(async function start() {
+  let picked;
+  try {
+    picked = await TH.mountHouseholds("household");
+  } catch (err) {
+    // Nothing below this line has a household to ask about, so it stops here
+    // rather than firing four fetches that will all 404.
+    TH.sayReadFailed(err, {
+      "day-label": "No day to show.",
+      "silence-message": "Nothing to watch yet.",
+      "weekly-text": "No week to summarise.",
+    });
+    return;
+  }
+  STATE.household = picked.selected;
+  STATE.date = TH.params().get("date");
+  STATE.deviceId = TH.params().get("device_id");
+
+  document.getElementById("date").addEventListener("change", (e) =>
+    TH.go({ date: e.target.value })
+  );
+  document.getElementById("door").addEventListener("change", (e) =>
+    TH.go({ device_id: e.target.value })
+  );
+  document.getElementById("weekly-refresh").addEventListener("click", () => loadWeekly(true));
+  document.getElementById("note-save").addEventListener("click", saveNote);
+  renderLegend();
+  window.matchMedia(TH.WIDE).addEventListener("change", relayout);
+
+  if (await loadDay()) await loadWeekly(false);
+})();
+</script>
+</body>
+</html>

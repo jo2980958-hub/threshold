@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threshold: the record</title>
+<link rel="stylesheet" href="/threshold.css">
+</head>
+<body>
+<div class="app-shell">
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <span class="brand-mark">T</span>
+    <span class="brand-name">Threshold</span>
+  </div>
+  <div class="top-nav-items" role="navigation" aria-label="Main">
+    <a class="top-nav-item" href="/" id="nav-day">Day</a>
+    <a class="top-nav-item" href="/history" aria-current="page">History</a>
+    <a class="top-nav-item" href="/agency" id="nav-agency">Agency</a>
+  </div>
+  <div class="top-nav-right">
+    <span class="tagline-pill">a front-door log, not a verdict</span>
+    <span class="show-chip"><span class="show-avatar" id="household-avatar">&nbsp;</span><span class="name" id="household-chip-name">&hellip;</span></span>
+  </div>
+</nav>
+
+<form class="toolbar" id="search-form" role="search">
+  <div class="toolbar-left">
+    <div class="field">
+      <label for="household">Household</label>
+      <select id="household"></select>
+    </div>
+    <div class="field">
+      <label for="q">Search the record</label>
+      <input type="search" id="q" placeholder="doorbell, motion, back door&hellip;">
+    </div>
+    <div class="field">
+      <label for="from">From</label>
+      <input type="date" id="from">
+    </div>
+    <div class="field">
+      <label for="to">To</label>
+      <input type="date" id="to">
+    </div>
+    <div class="field">
+      <label for="submit" class="visually-hidden">Apply</label>
+      <button id="submit" class="btn btn-primary" type="submit">Search</button>
+    </div>
+  </div>
+  <div class="toolbar-right">
+    <a class="btn btn-outline" id="export-report" href="#" title="Take this range to the agency as a plain-text report">Report</a>
+    <a class="btn btn-outline" id="export-csv" href="#" title="Take this range to the agency as CSV">CSV</a>
+  </div>
+</form>
+
+<dl class="metrics-strip">
+  <div class="metric-col"><dt>Household</dt><dd id="m-household">&mdash;</dd></div>
+  <div class="metric-col"><dt>Events matching</dt><dd id="m-total">&mdash;</dd></div>
+  <div class="metric-col"><dt>Showing</dt><dd id="m-showing">&mdash;</dd></div>
+  <div class="metric-col"><dt>Page</dt><dd id="m-page">&mdash;</dd></div>
+</dl>
+
+<main class="app-main">
+  <p class="read-failed" id="read-failed" role="alert" hidden></p>
+
+  <div class="page-head">
+    <h2>The record</h2>
+    <p>
+      Everything this household&rsquo;s doorbells have recorded since the account was
+      linked, newest first. Ring does not back-fill, so nothing exists here from
+      before that moment. Searching narrows what is shown on this page; it never
+      removes anything from the record itself, and no event is ever filtered out on
+      the strength of what Ring thought it saw. A row marked
+      <span class="mark" data-mark="RECORDED">RECORDED</span> is a sensor firing.
+      <span class="mark" data-mark="REPORTED">REPORTED</span> is Ring&rsquo;s own guess
+      about what it saw, from a classifier that has been documented calling a
+      motorised wheelchair user a package.
+    </p>
+  </div>
+
+  <p class="day-label" id="count" role="status" aria-live="polite">Loading the record&hellip;</p>
+
+  <ul class="record-list" id="results" aria-label="Door record"></ul>
+
+  <div class="pager">
+    <button class="btn btn-outline" id="prev" type="button">Newer</button>
+    <span id="page-label"></span>
+    <button class="btn btn-outline" id="next" type="button">Older</button>
+  </div>
+</main>
+</div>
+
+<script src="/threshold.js"></script>
+<script>
+const PAGE = 50;
+let STATE = { household: null, offset: 0, total: 0 };
+
+function currentFilters() {
+  return {
+    q: document.getElementById("q").value.trim(),
+    from: document.getElementById("from").value,
+    to: document.getElementById("to").value,
+  };
+}
+
+async function load() {
+  const f = currentFilters();
+  const qs = new URLSearchParams({
+    household: STATE.household,
+    limit: PAGE,
+    offset: STATE.offset,
+  });
+  if (f.q) qs.set("q", f.q);
+  if (f.from) qs.set("from", f.from + "T00:00:00Z");
+  if (f.to) qs.set("to", f.to + "T23:59:59Z");
+
+  let data;
+  try {
+    data = await TH.readJson("/api/history?" + qs.toString());
+  } catch (err) {
+    TH.sayReadFailed(err, { count: "The record could not be read." });
+    return;
+  }
+  STATE.total = data.total;
+
+  const list = document.getElementById("results");
+  list.setAttribute(
+    "aria-label",
+    data.total === 1 ? "Door record, 1 event" : "Door record, " + data.total + " events"
+  );
+
+  if (data.events.length === 0) {
+    list.innerHTML =
+      '<li><span class="what empty-note">Nothing in the record matches this search.</span></li>';
+  } else {
+    list.innerHTML = data.events
+      .map(function (e) {
+        const day = e.occurred_at.slice(0, 10);
+        return (
+          "<li>" +
+          '<span class="when">' + TH.escape(day) + " &middot; " +
+          TH.escape(TH.fmtTime(e.occurred_at)) + "</span>" +
+          '<span class="what">' + TH.escape(e.label) + "</span>" +
+          '<span class="where">' + TH.escape(e.door) +
+          (e.sub_type ? " &middot; Ring said &ldquo;" + TH.escape(e.sub_type) + "&rdquo;" : "") +
+          ' <span class="mark" data-mark="' + TH.escape(e.label_provenance) + '">' +
+          TH.escape(e.label_provenance) + "</span></span></li>"
+        );
+      })
+      .join("");
+  }
+
+  const shown = data.events.length;
+  document.getElementById("count").textContent =
+    data.total === 0
+      ? "No events match."
+      : "Showing " + (STATE.offset + 1) + " to " + (STATE.offset + shown) +
+        " of " + data.total + " recorded events.";
+  const pageOf = "Page " + (Math.floor(STATE.offset / PAGE) + 1) +
+    " of " + Math.max(Math.ceil(data.total / PAGE), 1);
+  document.getElementById("page-label").textContent = data.total === 0 ? "" : pageOf;
+  document.getElementById("prev").disabled = STATE.offset === 0;
+  document.getElementById("next").disabled = STATE.offset + PAGE >= data.total;
+
+  document.getElementById("m-total").textContent = data.total;
+  document.getElementById("m-showing").textContent =
+    data.total === 0 ? "0" : (STATE.offset + 1) + "–" + (STATE.offset + shown);
+  document.getElementById("m-page").textContent = data.total === 0 ? "—" : pageOf.replace("Page ", "");
+
+  wireLinks(f);
+}
+
+function wireLinks(f) {
+  const range = new URLSearchParams({ household: STATE.household });
+  if (f.from) range.set("from", f.from);
+  if (f.to) range.set("to", f.to);
+  document.getElementById("export-report").href = "/export.txt?" + range.toString();
+  document.getElementById("export-csv").href = "/export.csv?" + range.toString();
+  const link = new URLSearchParams({ household: STATE.household }).toString();
+  document.getElementById("nav-day").href = "/?" + link;
+  document.getElementById("nav-agency").href = "/agency?" + link;
+}
+
+(async function start() {
+  let picked;
+  try {
+    picked = await TH.mountHouseholds("household");
+  } catch (err) {
+    TH.sayReadFailed(err, { count: "No record to show." });
+    return;
+  }
+  STATE.household = picked.selected;
+  const current = picked.households.find((h) => h.id === picked.selected);
+  if (current) {
+    document.getElementById("household-chip-name").textContent = current.name;
+    document.getElementById("household-avatar").textContent =
+      current.name.trim().split(/\s+/).slice(0, 2).map((w) => w[0] || "").join("").toUpperCase() || "?";
+    document.getElementById("m-household").textContent = current.name;
+  }
+  const p = TH.params();
+  document.getElementById("q").value = p.get("q") || "";
+  document.getElementById("from").value = p.get("from") || "";
+  document.getElementById("to").value = p.get("to") || "";
+
+  document.getElementById("search-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    STATE.offset = 0;
+    const f = currentFilters();
+    history.replaceState({}, "", "?" + TH.query({ q: f.q, from: f.from, to: f.to }));
+    load();
+  });
+  document.getElementById("prev").addEventListener("click", function () {
+    STATE.offset = Math.max(0, STATE.offset - PAGE);
+    load();
+  });
+  document.getElementById("next").addEventListener("click", function () {
+    if (STATE.offset + PAGE < STATE.total) STATE.offset += PAGE;
+    load();
+  });
+
+  await load();
+})();
+</script>
+</body>
+</html>

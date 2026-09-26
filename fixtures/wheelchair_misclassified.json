@@ -1,0 +1,19 @@
+{
+  "_comment": "Reproduces the documented Ring defect (r/Ring, 'Wheelchair user indentified as package', 20 Aug 2026): a motorized wheelchair user's arrival is tagged sub_type=package instead of human. Threshold must still count this as front-door activity, because events.py and schedule.py never gate on sub_type. See tests/test_events.py and tests/test_schedule.py for the assertions this fixture backs.",
+  "visits": [
+    {
+      "label": "Afternoon visit",
+      "scheduled_start": "2026-09-22T15:00:00+00:00",
+      "scheduled_end": "2026-09-22T15:30:00+00:00"
+    }
+  ],
+  "events": [
+    {
+      "request_id": "evt-1510-wheelchair-arrival",
+      "device_id": "front_door_1",
+      "event_type": "motion_detected",
+      "created_at": "2026-09-22T15:10:22+00:00",
+      "attributes": {"sub_type": "package"}
+    }
+  ]
+}

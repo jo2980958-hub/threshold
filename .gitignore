@@ -1,0 +1,41 @@
+# Python — for apps with a FastAPI/CLI backend (e.g. Bee/Ring server-side code)
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Test / coverage / cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local databases and generated data
+*.db
+*.sqlite3
+local_data/
+# Agent / harness scratch
+.harness/
